@@ -59,11 +59,11 @@ def nextIntervalDatetime(dt: datetime, interval: Interval, count: int = 1) -> da
 
 
 def microSecToDatetime(microSec: int) -> datetime:
-    return datetime.fromtimestamp(int(microSec / 1_000_000)).replace(tzinfo=timezone.utc)
+    return datetime.fromtimestamp(int(microSec / 1_000_000), timezone.utc)
 
 
 def msToDatetime(ms: int) -> datetime:
-    return datetime.fromtimestamp(int(ms / 1_000)).replace(tzinfo=timezone.utc)
+    return datetime.fromtimestamp(int(ms / 1_000), timezone.utc)
 
 
 def datetimeToMicroSec(dt: datetime) -> int:
@@ -76,6 +76,7 @@ def datetimeToMs(dt: datetime) -> int:
 
 if __name__ == '__main__':
     start = datetime(2024, 1, 31)
+
     print(nextIntervalDatetime(start, Interval.SECOND_1))
     print(nextIntervalDatetime(start, Interval.MINUTE_1))
     print(nextIntervalDatetime(start, Interval.MINUTE_3))

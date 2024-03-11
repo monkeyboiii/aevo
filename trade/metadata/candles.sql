@@ -1,5 +1,9 @@
+--
+-- SQL_DROP_CANDLES
 DROP TABLE IF EXISTS candles_binance_1;
 
+--
+-- SQL_CREATE_CANDLE
 CREATE TABLE
   IF NOT EXISTS candles_binance_1 (
     -- most necessary
@@ -22,6 +26,8 @@ CREATE TABLE
 PARTITION BY
   MONTH;
 
+--
+-- SQL_INSERT_CANDLE
 INSERT INTO
   candles_binance_1 (
     -- most necessary
@@ -58,6 +64,8 @@ VALUES
     35103542.78288276
   );
 
+--
+-- SQL_UPDATE_CANDLE
 UPDATE candles_binance_1
 SET
   open = 30000.63000000,
@@ -75,17 +83,68 @@ WHERE
   AND interval = '1h'
   AND startTime = 1609459200000 * 1000;
 
+--
+-- SQL_MOST_RECENT_CANDLE
 SELECT
-  inst,
-  startTime,
-  interval
+  *
 from
   candles_binance_1
 WHERE
-  inst = 'BTC-USDT' LATEST ON startTime
+  inst = 'BTC-USDT'
+  AND interval in ('1h', '4h') LATEST ON startTime
 PARTITION BY
   inst,
   interval;
+
+-- 
+-- SQL_SELECT_CANDLE
+SELECT
+  *
+FROM
+  candles_binance_1
+WHERE
+  inst = 'ETH-USDT'
+  AND interval = '1h'
+  AND startTime BETWEEN '2024-03-01T00:00:00' AND '2024-03-02T00:00:00';
+
+--
+-- SQL_FIND_GAP
+WITH
+  candles_period AS (
+    SELECT
+      startTime,
+      cast(startTime as DOUBLE) as startTimeDouble
+    FROM
+      candles_binance_1
+    WHERE
+      inst = 'BTC-USDT'
+      AND interval = '4h'
+      AND startTime BETWEEN dateadd ('h', -4, '2024-03-01T00:00:00') AND '2024-03-08T00:00:00'
+  ),
+  candles_window AS (
+    SELECT
+      startTime,
+      FIRST_VALUE (startTimeDouble) OVER (
+        ORDER BY
+          startTime ROWS BETWEEN 1 PRECEDING
+          AND CURRRENT ROW EXCLUDE CURRENT ROW
+      ) as prevStartTimeDouble
+    FROM
+      candles_period
+  ),
+  candles_gap AS (
+    SELECT
+      startTime,
+      dateadd ('h', -4, startTime) as idealPrevStartTime,
+      cast(prevStartTimeDouble as TIMESTAMP) as actualPrevStartTime
+  )
+SELECT
+  startTime,
+  prevTime
+FROM
+  candles_gap
+WHERE
+  idealPrevStartTime <> actualPrevStartTime;
 
 --
 -- DEBUG

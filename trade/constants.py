@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from pydantic import BaseModel
 from typing import Literal, Union
-from .utils.interval import Interval
+from .utils.interval import Interval, microSecToDatetime
 from .utils.inst import Asset, Spot, Future
 
 
@@ -47,4 +47,4 @@ class Candle(BaseModel):
 
     @property
     def abstract(self) -> str:
-        return f'[{self.inst}] opens on [{datetime.fromtimestamp(self.startTimeInMicroSec / 1_000_000).isoformat()}] at [{self.open_}]'
+        return f'[{self.inst}] opens on [{microSecToDatetime(self.startTimeInMicroSec).isoformat()}] at [{self.open_}]'

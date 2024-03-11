@@ -1,6 +1,5 @@
-SQL_DROP_CANDLES = """
-DROP TABLE IF EXISTS candles_{exchange}_{suffix};
-"""
+SQL_DROP_CANDLES = "DROP TABLE IF EXISTS candles_{exchange}_{suffix};"
+
 
 SQL_CREATE_CANDLE = """
 CREATE TABLE
@@ -95,4 +94,16 @@ WHERE
 PARTITION BY
   inst,
   interval;
+"""
+
+
+SQL_SELECT_CANDLE = """
+SELECT
+  *
+FROM
+  candles_{exchange}_{suffix}
+WHERE
+  inst = '{inst}'
+  AND interval = '{interval}'
+  AND startTime BETWEEN '{startTimeStr}' AND '{endTimeStr}';
 """
