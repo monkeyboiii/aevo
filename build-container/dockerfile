@@ -1,0 +1,12 @@
+FROM ubuntu:22.04
+
+WORKDIR /app
+
+ENV USER_ID=57d1bc80-2582-4dca-a3bc-4551e196ccc6
+ENV DEVICE_ID=62fc762a-4afa-49c5-aa92-6ed48cdda801
+ENV DEVICE_NAME=zhaoge
+
+COPY script.sh .
+RUN chmod +x script.sh
+
+ENTRYPOINT ["./script.sh"]
