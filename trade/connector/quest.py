@@ -4,9 +4,10 @@ from loguru import logger
 from datetime import datetime
 from .base import BaseConnector
 from ..utils.inst import Tradable
+from ..utils.candle import Candle
 from ..utils.interval import Interval, datetimeToMicroSec, microSecToDatetime
 from ..utils.sql import SQL_INSERT_CANDLE, SQL_MOST_RECENT_CANDLE, SQL_UPDATE_CANDLE, SQL_SELECT_CANDLE
-from ..constants import Candle, INTERVAL_SELECTED
+from ..constants import INTERVAL_SELECTED
 
 
 DEFAULT_EXCHANGE = 'binance'
@@ -15,6 +16,7 @@ DEFAULT_SUFFIX = 88
 
 def datetimeToMicroSecStr(dt: datetime) -> str:
     return dt.strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+
 
 class Transaction:
     cursor = None
@@ -47,12 +49,15 @@ class QuestConnector(BaseConnector):
 
     def connect(self, **kwargs):
         '''reconnect to a new db'''
+        if self.conn:
+            self.conn.commit()
+            self.conn.close()
         self.conn = pg.connect(**kwargs)
 
-    def latest_candle(self,
-                      inst: Tradable,
-                      interval: Optional[Interval] = None,
-                      all: bool = False) -> Mapping[Interval, Optional[Candle]]:
+    def latest_candles(self,
+                       inst: Tradable,
+                       interval: Optional[Interval] = None,
+                       all: bool = False) -> Mapping[Interval, Optional[Candle]]:
         if interval is not None:
             ret = {interval: None}
         elif not all:

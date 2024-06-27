@@ -1,7 +1,7 @@
 from typing import Sequence
 from .base import BaseClient
 from binance.spot import Spot as SpotClient
-from ..constants import Candle
+from ..utils.candle import Candle
 from ..utils.interval import Interval
 from ..utils.inst import Tradable, Spot, Future
 

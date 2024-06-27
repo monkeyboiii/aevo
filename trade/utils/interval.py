@@ -92,3 +92,6 @@ if __name__ == '__main__':
     print(nextIntervalDatetime(start, Interval.DAY_3))
     print(nextIntervalDatetime(start, Interval.WEEK_1))
     print(nextIntervalDatetime(start, Interval.MONTH_1))
+
+    ret = {intv: None for intv in Interval}
+    print(list(map(lambda k: k.name, ret.keys())))

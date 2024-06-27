@@ -4,7 +4,7 @@ from trade.utils.interval import Interval
 from trade.constants import SPOT_BTC
 
 
-collector = Collector('binance', 1, dropIfExists=True)
+collector = Collector('binance', 1, dropIfExists=False, connector={"host": "10.23.38.185"})
 collector.auto_fill(SPOT_BTC,
-                    Interval.HOUR_4,
-                    datetime(2024, 3, 1, tzinfo=timezone.utc))
+                    Interval.DAY_1,
+                    datetime(2024, 6, 1, tzinfo=timezone.utc))

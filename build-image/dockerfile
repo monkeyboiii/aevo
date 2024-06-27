@@ -1,0 +1,51 @@
+FROM nvidia/cuda:11.6.1-base-ubuntu20.04
+
+
+# avoid prompts
+ARG DEBIAN_FRONTEND=noninteractive
+RUN apt-get update -y && apt-get install -y sudo curl ca-certificates gnupg
+
+
+# install docker 
+RUN sudo install -m 0755 -d /etc/apt/keyrings
+ARG FILE=/etc/apt/keyrings/docker.gpg
+RUN if [ -f "$FILE" ]; then sudo rm "$FILE" ; fi
+RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o "$FILE"
+RUN sudo chmod a+r /etc/apt/keyrings/docker.gpg
+
+RUN echo \
+      "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+      $(. /etc/os-release; echo "$VERSION_CODENAME") stable" | \
+      sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+RUN apt-get update -y && apt-get install -y docker-ce
+
+
+# install docker-compose
+RUN sudo apt -y install docker-compose-plugin
+RUN sudo ln -sv /usr/libexec/docker/cli-plugins/docker-compose /usr/bin/docker-compose
+
+
+# install nvidia-ctk
+RUN mkdir -p /etc/docker
+RUN sudo apt-get install -y nvidia-container-toolkit
+# RUN sudo nvidia-ctk runtime configure --runtime=docker # NOTE: is this necessary?
+# RUN sudo bash -c 'echo \"{ "runtimes": { "nvidia": { "path": "nvidia-container-runtime", "runtimeArgs": [] } }, "exec-opts": ["native.cgroupdriver=cgroupfs"] }\" >/etc/docker/daemon.json'
+
+
+# binary
+WORKDIR /app
+
+COPY launch_binary_linux .
+RUN chmod +x launch_binary_linux
+
+COPY my_script.sh .
+RUN chmod +x my_script.sh
+
+
+# prepare envs
+ENV USER_ID=57d1bc80-2582-4dca-a3bc-4551e196ccc6
+ENV DEVICE_ID=ef50edee-8528-4dbe-857b-40e5d7b97fe5 
+ENV DEVICE_NAME=niger
+
+
+ENTRYPOINT ["/bin/bash", "-c", "./my_script.sh"]

@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Optional
-from enum import Enum
 from datetime import datetime
+from .asset import Asset
 
 
 _SETTLEMENT_FORMAT = '%y%m%d'
@@ -10,13 +10,6 @@ _SETTLEMENT_FORMAT = '%y%m%d'
 def _getSettlementDate(dt: datetime) -> str:
     '''e.g. 2024-03-02 -> 240302'''
     return dt.date().strftime(_SETTLEMENT_FORMAT)
-
-
-class Asset(Enum):
-    BTC: str = "BTC"
-    ETH: str = "ETH"
-    USDT: str = "USDT"
-    USDC: str = "USDC"
 
 
 class Tradable(ABC):
@@ -38,6 +31,7 @@ class Tradable(ABC):
 
     @staticmethod
     def fromString(s: str):
+        '''in the format of {BASE}-{QUOTE}[-PERP|-240302]'''
         bp = s.split('-')
         base = bp[0]
         quote = bp[1]
@@ -59,7 +53,7 @@ class Spot(Tradable):
 class Future(Tradable):
     def __init__(self, base: Asset, quote: Asset, settlement: Optional[datetime] = None, isPerp: bool = True):
         super().__init__(base, quote)
-        self.isPerp = isPerp
+        self.isPerp = isPerp if settlement is None else False
         self.settle = None if self.isPerp else settlement
 
     @property

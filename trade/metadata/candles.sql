@@ -109,6 +109,11 @@ WHERE
 
 --
 -- SQL_FIND_GAP
+/* Still needs to consider 
+ * 1. if first period is before the actual startTime in db
+ * 2. to substitute args with parameters
+ * 3. coordinate utc storing
+ */
 WITH
   candles_period AS (
     SELECT

@@ -7,10 +7,11 @@ from ..client.Binance import BinanceClient
 from ..client.OKX import OKXClient
 from ..connector.base import BaseConnector
 from ..connector.quest import QuestConnector, Transaction
+from ..utils.candle import Candle
 from ..utils.inst import Tradable
 from ..utils.interval import Interval, nextIntervalDatetime, microSecToDatetime, datetimeToMs
 from ..utils.sql import *
-from ..constants import Candle, COLLECTOR_START_TIME_TIMESTAMP, INTERVAL_SELECTED, INSTRUMENT_SELECTED, SPOT_ETH
+from ..constants import COLLECTOR_START_TIME_TIMESTAMP, INTERVAL_SELECTED, INSTRUMENT_SELECTED, SPOT_ETH
 
 
 EXCHANGES = {
@@ -33,7 +34,8 @@ class Collector:
     def __init__(self,
                  exchange='binance',
                  suffix=0,
-                 dropIfExists=False):
+                 dropIfExists=False,
+                 connector={}):
         self.exchange = exchange.lower()
         self.suffix = suffix
 
@@ -44,7 +46,8 @@ class Collector:
         self.retriever = EXCHANGES[self.exchange]()
 
         # time series db
-        self.storage = QuestConnector(exchange=exchange, suffix=suffix)
+        self.storage = QuestConnector(
+            exchange=exchange, suffix=suffix, **connector)
 
         # table manipulation
         with Transaction(self.storage) as tx:
@@ -84,9 +87,9 @@ class Collector:
                   interval: Interval,
                   start: Optional[datetime] = None,
                   end: Optional[datetime] = None):
-        '''fill with candles from start to end'''
+        ''' fill with candles from start to end '''
 
-        candle = self.storage.latest_candle(inst, interval)[interval]
+        candle = self.storage.latest_candles(inst, interval)[interval]
         emptyDB = candle is None
         fix = not emptyDB  # fix first incomplete candle
         startInDB = COLLECTOR_START_TIME_TIMESTAMP if emptyDB else microSecToDatetime(

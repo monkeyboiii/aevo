@@ -1,9 +1,10 @@
 from abc import ABC, abstractmethod
 from typing import Optional, Sequence
 from datetime import datetime
-from trade.constants import Candle
+from ..utils.asset import Asset
+from ..utils.candle import Candle
 from ..utils.interval import Interval
-from ..utils.inst import Asset, Tradable
+from ..utils.inst import Tradable
 
 
 class BaseClient(ABC):
